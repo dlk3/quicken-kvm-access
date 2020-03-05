@@ -1,0 +1,9 @@
+# $Id: autokey-qt.desktop 22 2008-01-29 11:29:13Z peabody $
+[Desktop Entry]
+Name=Quicken
+Comment=Access My Remote Quicken KVM
+Exec=quicken-kvm-access
+Terminal=false
+Type=Application
+Icon=quicken-kvm-access
+Categories=Office;
