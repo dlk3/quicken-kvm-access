@@ -1,9 +1,12 @@
-# $Id: autokey-qt.desktop 22 2008-01-29 11:29:13Z peabody $
 [Desktop Entry]
+Type=Application
+Version=1.0
 Name=Quicken
-Comment=Access My Remote Quicken KVM
+GenericName=Access Quicken In A Remote KVM
+Comment=Access Quicken KVM on fang
+Icon=quicken-kvm-access
+TryExec=quicken-kvm-access
 Exec=quicken-kvm-access
 Terminal=false
-Type=Application
-Icon=quicken-kvm-access
 Categories=Office;
+StartupNotify=true

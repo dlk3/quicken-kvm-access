@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 SPECFILE="quicken-kvm-access.spec"
 
 set -e
@@ -17,7 +21,7 @@ if [ $(cat /etc/hostname) == "fang.localdomain" ]; then
 	echo "Building $NAME in fedora-rpmbuild:31 container ..."
 	podman run --interactive --name=rpmbuild --rm --tty --volume=${HOME}:${HOME} localhost/fedora-rpmbuild:31 "$(realpath "$0")"
 
-	echo -e "\nTest installation of ${NAME}-${VERSION}-${RELEASE}.fc30.x86_64.rpm in fedora-rpmbuild:31 container ..."
+	echo -e "\nTest installation of ${NAME}-${VERSION}-${RELEASE}.fc31.${ARCH}.rpm in fedora-rpmbuild:31 container ..."
 	podman run --interactive --name=rpmbuild --rm --tty --volume=${HOME}:${HOME} localhost/fedora-rpmbuild:31 dnf install -y ${HOME}/rpmbuild/RPMS/${ARCH}/${NAME}-${VERSION}-${RELEASE}.fc31.${ARCH}.rpm
 	
 	echo -e "\nSending source RPM to COPR build ..."

@@ -4,13 +4,13 @@ A script that establishes a session on my laptop with a Quicken/Windows 10 KVM
 that's running remotely on my main desktop computer.  I use this when I'm travelling and
 need secure access back to my Quicken application.
 
-Variables mush be set properly at the top of the /usr/local/bin/quicken file
-in order for this to work properly.
+Variables configured properly in /etc/quicken-kvm-access.conf in order for
+this script to function.
 
 Installation packages are available in this project's Fedora COPR repository:
 ```
-$ sudo dnf copr enable dlk/quicken
-$ sudo dnf install quicken
+$ sudo dnf copr enable dlk/quicken-kvm-access
+$ sudo dnf install quicken-kvm-access
 ```
 Configuration Notes:
 
@@ -25,3 +25,6 @@ own IP address on my home network.
 * The Windows system running in the KBM is configured to accept Remote Desktop
 sessions.  See https://support.microsoft.com/en-us/help/4028379/windows-10-how-to-use-remote-desktop
 
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
