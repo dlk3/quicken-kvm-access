@@ -1,0 +1,15 @@
+[default]
+
+#  "node_uri" is the value used with the "--connect=" option of the "virsh" 
+#  command. It specifies the location and access method for the host that is
+#  running the remote KVM.
+node_uri = qemu+ssh://root@myhost.localdomain/system
+
+#  The name of the KVM 
+domain_name = windows-10
+
+#  The Windows Remote Desktop userid
+userid = myuserid
+
+#  The Windows Remote Desktop password
+password = mypassword
