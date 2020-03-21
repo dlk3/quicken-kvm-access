@@ -1,7 +1,7 @@
 %define  debug_package %{nil}
 
 Name:		quicken-kvm-access
-Version:	1.0.0
+Version:	2.0.0
 Release:	1%{?dist}
 Summary:	Remote access to my KVM domain that's running Quicken
 Source0:	%{name}-%{version}.tar.gz
@@ -47,5 +47,7 @@ exit 0
 exit 0
 
 %changelog
+* Sat Mar 21 2020 David King <dave@daveking.com> - 2.0.0-1
+	Renove the remote discovery of the KVM IP address and switch to hard-coding it in the quicken-kvm-access.conf file
 * Thu Mar 5 2020 David King <dave@daveking.com> - 1.0.0-1
 	Initial Version

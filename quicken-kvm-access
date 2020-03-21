@@ -8,57 +8,68 @@
 
 import configparser
 import subprocess
+import time
 
 config_file = '/etc/quicken-kvm-access.conf'
-cfg = configparser.ConfigParser()
-cfg.read(config_file)
-if 'default' not in cfg.sections():
-	print('No [default] section found in config file {}'.format(config_file))
-	exit(1)
-if 'node_uri' not in cfg['default']:
-	print('"node_uri" variable not found in config file {}'.format(config_file))
-	exit(1)
-if 'domain_name' not in cfg['default']:
-	print('"domain_name variable not found in config file {}'.format(config_file))
-	exit(1)
-if 'userid' not in cfg['default']:
-	print('"userid" variable not found in config file {}'.format(config_file))
-	exit(1)
-if 'password' not in cfg['default']:
-	print('"password" variable not found in config file {}'.format(config_file))
-	exit(1)
-	
 notify_program_name = 'Quicken'
 notify_icon_file = 'quicken-kvm-access'
 
+cfg = configparser.ConfigParser()
+cfg.read(config_file)
+if 'quicken' not in cfg.sections():
+	print('No [default] section found in config file {}'.format(config_file))
+	exit(1)
+if 'node_uri' not in cfg['quicken']:
+	print('"node_uri" variable not found in config file {}'.format(config_file))
+	exit(1)
+if 'ip_address' not in cfg['quicken']:
+	print('"ip_address" variable not found in config file {}'.format(config_file))
+	exit(1)
+if 'domain_name' not in cfg['quicken']:
+	print('"domain_name variable not found in config file {}'.format(config_file))
+	exit(1)
+if 'timeout' not in cfg['quicken']:
+	print('"timeout" variable not found in config file {}'.format(config_file))
+	exit(1)
+if 'userid' not in cfg['quicken']:
+	print('"userid" variable not found in config file {}'.format(config_file))
+	exit(1)
+if 'password' not in cfg['quicken']:
+	print('"password" variable not found in config file {}'.format(config_file))
+	exit(1)
+	
 def run_cmd(cmd):
 	return subprocess.run(cmd, shell=True, capture_output=True)
 
 #  If the VM isn't running then start it up
-result = run_cmd('virsh --connect=\'{}\' domstate {}'.format(cfg['default']['node_uri'], cfg['default']['domain_name']))
+result = run_cmd('virsh --connect=\'{}\' domstate {}'.format(cfg['quicken']['node_uri'], cfg['quicken']['domain_name']))
 if str(result.stdout, 'utf-8').strip() != 'running':
-	result = run_cmd('virsh --connect=\'{}\' start {}'.format(cfg['default']['node_uri'], cfg['default']['domain_name']))
-	run_cmd('notify-send -i "{}" "{}" "Waiting for {} VM to start"'.format(notify_icon_file, notify_program_name, cfg['default']['domain_name']))
+	result = run_cmd('virsh --connect=\'{}\' start {}'.format(cfg['quicken']['node_uri'], cfg['quicken']['domain_name']))
+	run_cmd('notify-send -i "{}" "{}" "Waiting for {} VM to start"'.format(notify_icon_file, notify_program_name, cfg['quicken']['domain_name']))
 
 if result.returncode == 0:
-	#  Get the VM's ip address
-	attempt_ctr = 0
+	#  Connect to the VM
+	start = time.time()
 	while True:
-		attempt_ctr = attempt_ctr + 1
-		result = run_cmd('virsh --connect=\'{}\' domifaddr {} --source arp'.format(cfg['default']['node_uri'], cfg['default']['domain_name']))
-		for line in str(result.stdout, 'utf-8').split('\n'):
-			if line.strip().startswith('vnet0'):
-				ipaddr = line.split()[3].split('/')[0]
-				#  Connect to the VM
-				while True:
-					result = run_cmd('echo \'{}\' | rdesktop -u {} -p - -g 100%x100% {}'.format(cfg['default']['password'], cfg['default']['userid'], ipaddr))
-					#  The rdesktop command has to be run manually in a terminal
-					#  one time so that the host certificate can be accepted.
-					if 'unable to connect' not in str(result.stderr, 'utf-8'):
-						exit(0)
-					run_cmd('notify-send -i {} "{}" "{}"'.format(notify_icon_file, notify_program_name, str(result.stderr, 'utf-8').split('\n')[-2]))
-		#  Refresh arp table on host
-		run_cmd('ssh \'{}\' nmap -sn \'192.168.1.*\''.format(cfg['default']['node_uri'].split('/')[2]))
-		if attempt_ctr == 3:
-			run_cmd('notify-send -i {} "{}" "{}"'.format(notify_icon_file, '{} Terminated'.format(notify_program_name), 'Unable to obtain IP address for {} guest'.format(cfg['default']['domain_name'])))
-			exit(1)
+		result = run_cmd('echo \'{}\' | rdesktop -E -u {} -p - -g 100%x100% {}'.format(cfg['quicken']['password'], cfg['quicken']['userid'], cfg['quicken']['ip_address']))
+		#  The rdesktop command has to be run manually in a terminal
+		#  one time so that the host certificate can be accepted.
+		rc = result.returncode
+		if rc > 2:
+			if rc == 11:
+				run_cmd('notify-send -i {} "{}" "Disconnect by user"'.format(notify_icon_file, notify_program_name))
+			elif rc == 12:
+				run_cmd('notify-send -i {} "{}" "Logout initiated by user"'.format(notify_icon_file, notify_program_name))
+			elif rc == 62:
+				run_cmd('notify-send -i {} "{}" "The local client window was closed"'.format(notify_icon_file, notify_program_name))
+			elif rc == 76:
+				print(str(result.stderr, 'utf-8'))
+				if time.time() - start < float(cfg['quicken']['timeout']):
+					run_cmd('notify-send -i {} "{}" "Still waiting for VM"'.format(notify_icon_file, notify_program_name))
+					continue
+				else:
+					run_cmd('notify-send -i {} "{}" "Timed out while waiting for VM ({} seconds)"'.format(notify_icon_file, notify_program_name, timeout))
+			else:	
+				print(str(result.stderr, 'utf-8'))
+				run_cmd('notify-send -i {} "{}" "rdesktop failed unexpectedly with rc = {}"'.format(notify_icon_file, notify_program_name, rc))
+		exit(rc)
