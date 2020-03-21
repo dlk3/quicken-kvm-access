@@ -8,6 +8,9 @@ node_uri = qemu+ssh://root@myhost.localdomain/system
 #  The name of the KVM 
 domain_name = windows-10
 
+#  IP Address or Hostname of the KVM
+ip_address = windows-10.localdomain
+
 #  The Windows Remote Desktop userid
 userid = myuserid
 
